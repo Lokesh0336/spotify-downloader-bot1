@@ -20,4 +20,5 @@ spotdl
 yt-dlp==2024.12.23
 telebot
 pydub==0.25.1
-pyaudio==0.2.11
+soundfile==0.10.3.post1
+
