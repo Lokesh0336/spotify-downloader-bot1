@@ -121,7 +121,7 @@ async def handle_pagination(update: Update, context):
     query_text = query.message.text.split(":")[1].strip()  # Extract the original query
     await display_search_results(update, context, query=query_text, page=current_page[chat_id])
 
-# Function to handle selection of a song
+# Function to handle selection of a song (using yt-dlp with cookies)
 async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -134,15 +134,27 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
     track = search_results[chat_id][track_index]
     track_name = track["name"]
     track_artist = ", ".join([artist["name"] for artist in track["artists"]])
-    track_url = track["external_urls"]["spotify"]
+    track_url = track["external_urls"]["spotify"]  # For YouTube, change this URL accordingly if needed
 
     await query.edit_message_text(
         f"Selected: {track_name} by {track_artist}\nDownloading..."
     )
 
     try:
-        # Use spotdl for downloading (ensure spotdl is installed in your environment)
-        command = ["spotdl", "download", track_url]
+        # Set the cookies file path
+        cookies_file_path = "cookies.txt"  # Assuming cookies.txt is present in your project directory
+
+        # Check if the cookies.txt file exists
+        if not os.path.exists(cookies_file_path):
+            await query.message.reply_text("Cookies file not found. Please upload the cookies file.")
+            return
+
+        # Download the song using yt-dlp with cookies (ensure yt-dlp is installed in your environment)
+        command = [
+            "yt-dlp",
+            "--cookies", cookies_file_path,  # Specify the cookies file
+            track_url  # The track URL from Spotify or YouTube link
+        ]
         subprocess.run(command, check=True)
 
         # Find the downloaded file (assuming it has the .mp3 extension)
