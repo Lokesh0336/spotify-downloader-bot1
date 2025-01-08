@@ -134,7 +134,7 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
     track = search_results[chat_id][track_index]
     track_name = track["name"]
     track_artist = ", ".join([artist["name"] for artist in track["artists"]])
-    track_url = track["external_urls"]["spotify"]  # For YouTube, change this URL accordingly if needed
+    track_url = track["external_urls"]["spotify"]  # Spotify URL for the track
 
     await query.edit_message_text(
         f"Selected: {track_name} by {track_artist}\nDownloading..."
@@ -146,7 +146,7 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "yt-dlp",
             "--extract-audio",  # Extract audio only (e.g., mp3)
             "--audio-format", "mp3",  # Convert to mp3 format
-            track_url  # The track URL from Spotify or YouTube link
+            track_url  # The track URL from Spotify
         ]
         result = subprocess.run(command, capture_output=True, text=True)
 
