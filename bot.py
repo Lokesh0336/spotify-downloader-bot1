@@ -5,6 +5,9 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, CallbackQueryHandler, filters
+from pydub import AudioSegment
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, TIT2, TPE1, TALB
 
 # Fetch sensitive data from environment variables set on Heroku
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
@@ -157,8 +160,21 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Find the downloaded file (assuming it has the .mp3 extension)
         for file in os.listdir("."):
             if file.endswith(".mp3"):
-                with open(file, "rb") as audio:
-                    await query.message.reply_audio(audio)
+                # Use pydub to convert audio if necessary (e.g., to adjust bitrate)
+                audio = AudioSegment.from_mp3(file)
+                audio = audio.set_channels(1)  # Mono
+                audio = audio.set_frame_rate(44100)  # 44.1kHz sample rate
+                audio.export(file, format="mp3")
+
+                # Use mutagen to add metadata (ID3 tags)
+                audio_file = MP3(file, ID3=ID3)
+                audio_file.tags.add(TIT2(encoding=3, text=track_name))  # Title
+                audio_file.tags.add(TPE1(encoding=3, text=track_artist))  # Artist
+                audio_file.tags.add(TALB(encoding=3, text="Spotify"))  # Album (custom tag)
+
+                # Send the MP3 file to the user
+                with open(file, "rb") as audio_data:
+                    await query.message.reply_audio(audio_data)
                 os.remove(file)  # Clean up the downloaded file
                 return
 
