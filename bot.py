@@ -155,6 +155,7 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
         command = [
             "spotdl",
             "download",
+            "--audio", "youtube",  # Explicitly mention audio source
             "--output", f"{output_dir}/%(artist)s - %(title)s.%(ext)s",
             track_url,
         ]
