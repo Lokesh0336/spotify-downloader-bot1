@@ -19,4 +19,5 @@ urllib3==2.2.3
 spotdl
 yt-dlp==2024.12.23
 telebot
-pydub
+pydub==0.25.1
+pyaudio==0.2.11
