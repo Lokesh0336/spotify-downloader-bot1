@@ -1,15 +1,22 @@
-import subprocess
 import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+import subprocess
+import json
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+# Get the bot token from environment variables
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 
 # Define the command to search for songs
 async def search_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text
     chat_id = update.message.chat_id
 
-    # Assume the search_results are populated with relevant song data
-    search_results = {}  # Define your search_results here
+    # Placeholder for search results (populate with actual Spotify search logic)
+    search_results = {}
 
     # Prepare keyboard with song options
     keyboard = [
@@ -87,8 +94,8 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for file in os.listdir(output_dir):
             os.remove(os.path.join(output_dir, file))
 
-# Add your token and initialize the bot
-application = Application.builder().token('YOUR_BOT_TOKEN').build()
+# Initialize the application with the bot token
+application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
 # Add command handlers
 application.add_handler(CommandHandler("search", search_song))
