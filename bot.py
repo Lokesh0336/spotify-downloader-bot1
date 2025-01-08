@@ -154,10 +154,10 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Download the song using spotdl
         command = [
             "spotdl",
-            "download",
-            "--audio", "youtube",  # Explicitly mention audio source
-            "--output", f"{output_dir}/%(artist)s - %(title)s.%(ext)s",
-            track_url,
+            "download",  # Command to download
+            "--format", "mp3",  # Force mp3 format
+            "--output", f"{output_dir}/%(artist)s - %(title)s.%(ext)s",  # Output path
+            track_url,  # Track URL
         ]
         result = subprocess.run(command, capture_output=True, text=True)
 
