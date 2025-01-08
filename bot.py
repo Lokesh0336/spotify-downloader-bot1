@@ -141,31 +141,47 @@ async def select_song(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        # Clear any existing audio files before downloading a new one
-        for file in os.listdir("."):
-            if file.endswith(".mp3"):
-                os.remove(file)
+        # Define output directory and clean up any existing files
+        output_dir = "downloads"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
-        # Download the song using spotdl (without specifying format)
+        # Clear existing MP3 files in the output directory
+        for file in os.listdir(output_dir):
+            if file.endswith(".mp3"):
+                os.remove(os.path.join(output_dir, file))
+
+        # Download the song using spotdl
         command = [
             "spotdl",
             "download",
-            track_url
+            "--output", f"{output_dir}/%(artist)s - %(title)s.%(ext)s",
+            track_url,
         ]
-        subprocess.run(command, check=True)
+        result = subprocess.run(command, capture_output=True, text=True)
 
-        # Find the downloaded file (assuming it has the .mp3 extension)
-        for file in os.listdir("."):
+        if result.returncode != 0:
+            await query.message.reply_text(f"Download failed: {result.stderr}")
+            return
+
+        # Find the downloaded file and send it to the user
+        for file in os.listdir(output_dir):
             if file.endswith(".mp3"):
-                with open(file, "rb") as audio:
+                file_path = os.path.join(output_dir, file)
+                with open(file_path, "rb") as audio:
                     await query.message.reply_audio(audio)
-                os.remove(file)  # Clean up the downloaded file
+                os.remove(file_path)  # Clean up the downloaded file
                 return
 
         await query.message.reply_text("Failed to find the downloaded file.")
 
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {e}")
+
+    finally:
+        # Ensure all files are cleaned up
+        for file in os.listdir(output_dir):
+            os.remove(os.path.join(output_dir, file))
 
 # Main function to start the bot
 def main():
